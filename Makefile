@@ -38,6 +38,9 @@ migrations-status:
 migrations-new:
 	goose -dir $(FOLDER_PG) create $(MIGRATION_NAME) sql
 
+gen:
+	go generate ./...
+
 docker:
 	docker compose up -d
 

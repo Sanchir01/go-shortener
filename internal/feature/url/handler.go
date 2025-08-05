@@ -1,14 +1,22 @@
 package url
 
 import (
+	"context"
 	"fmt"
 	"log/slog"
 	"net/http"
 
 	"github.com/Sanchir01/currency-wallet/pkg/api"
+	"github.com/Sanchir01/go-shortener/internal/domain/models"
 	"github.com/go-chi/render"
+	"github.com/google/uuid"
 )
 
+//go:generate go run github.com/vektra/mockery/v2@v2.52.2 --name=UrlHandler
+type UrlHandler interface {
+	GetAllUrl(ctx context.Context) ([]models.Url, error)
+	CreateUrl(ctx context.Context, userId uuid.UUID, url string) error
+}
 type Handler struct {
 	service *Service
 	l       *slog.Logger

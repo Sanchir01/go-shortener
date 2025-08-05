@@ -11,13 +11,18 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
+type UrlService interface {
+	CreateUrl(ctx context.Context, userId uuid.UUID, url, alise string, tx pgx.Tx) error
+	GetUrlByUserId(ctx context.Context, userId uuid.UUID) ([]models.Url, error)
+	GetAllUrl(ctx context.Context) ([]models.Url, error)
+}
 type Service struct {
-	repo      *Repository
+	repo      UrlService
 	primaryDB *pgxpool.Pool
 	l         *slog.Logger
 }
 
-func NewService(repo *Repository, primaryDB *pgxpool.Pool, l *slog.Logger) *Service {
+func NewService(repo UrlService, primaryDB *pgxpool.Pool, l *slog.Logger) *Service {
 	return &Service{
 		repo:      repo,
 		primaryDB: primaryDB,
@@ -62,7 +67,6 @@ func (s *Service) CreateUrl(ctx context.Context, userId uuid.UUID, url string) e
 				return
 			}
 		}
-
 	}()
 
 	if err := s.repo.CreateUrl(ctx, userId, url, "", tx); err != nil {
