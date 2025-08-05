@@ -1,0 +1,30 @@
+env: "development"
+
+http_server:
+  host: 0.0.0.0
+  port: 4200
+  timeout: 4s
+  debug: true
+  idle_timeout: 60s
+
+prometheus:
+  host: "localhost"
+  port: 4201
+  timeout: 4s
+  debug: true
+  idle_timeout: 60s
+
+redis:
+  host: localhost
+  port: "6390"
+  password: ""
+  retries: 5
+  dbnumber: 0
+
+database:
+  host: localhost
+  port: "5443"
+  user: "postgres"
+  password: "postgres"
+  dbname: "shortener"
+  max_attempts: 5

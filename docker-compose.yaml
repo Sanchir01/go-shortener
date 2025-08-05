@@ -1,0 +1,20 @@
+services:
+  db:
+    restart: always
+    image: postgres:17.5
+    ports:
+      - "5443:5432"
+    environment:
+      - POSTGRES_DB=shortener
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_USER=postgres
+  redis:
+    restart: always
+    image: redis:7.2
+    ports:
+      - "6390:6379"
+    volumes:
+      - redis_data:/data
+volumes:
+  db:
+  redis_data:

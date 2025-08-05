@@ -1,0 +1,203 @@
+basePath: /api/v1
+definitions:
+  api.Response:
+    properties:
+      error:
+        type: string
+      status:
+        type: string
+    type: object
+  models.Url:
+    properties:
+      alias:
+        type: string
+      createdAt:
+        type: string
+      id:
+        type: string
+      updatedAt:
+        type: string
+      url:
+        type: string
+      userID:
+        type: string
+    type: object
+  url.GetAllUrlResponse:
+    properties:
+      response:
+        $ref: '#/definitions/api.Response'
+      urls:
+        items:
+          $ref: '#/definitions/models.Url'
+        type: array
+    type: object
+  user.AuthResponse:
+    properties:
+      error:
+        type: string
+      status:
+        type: string
+    type: object
+  user.LoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  user.LoginResponse:
+    properties:
+      email:
+        type: string
+      error:
+        type: string
+      status:
+        type: string
+      username:
+        type: string
+    type: object
+host: localhost:4200
+info:
+  contact:
+    name: GitHub
+    url: https://github.com/Sanchir01
+  description: This is a sample server seller
+  termsOfService: http://swagger.io/terms/
+  title: "\U0001F680 URL-SHORTENER"
+  version: "1.0"
+paths:
+  /google:
+    get:
+      consumes:
+      - application/json
+      description: google register user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.Response'
+      summary: GogleRegister
+      tags:
+      - auth
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: login user
+      parameters:
+      - description: auth body
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/user.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user.LoginResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.Response'
+      summary: Login
+      tags:
+      - auth
+  /register:
+    post:
+      consumes:
+      - application/json
+      description: register user
+      parameters:
+      - description: login body
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/user.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/user.AuthResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.Response'
+      summary: Auth
+      tags:
+      - auth
+  /url:
+    get:
+      consumes:
+      - application/json
+      description: Get all urls admin
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/url.GetAllUrlResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.Response'
+      summary: GetAllUrlHandler
+      tags:
+      - url
+securityDefinitions:
+  AccessTokenCookie:
+    in: cookie
+    name: accessToken
+    type: apiKey
+  RefreshTokenCookie:
+    in: cookie
+    name: refreshToken
+    type: apiKey
+swagger: "2.0"

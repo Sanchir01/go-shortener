@@ -1,0 +1,14 @@
+version: "2"
+
+linters:
+  settings:
+    errcheck:
+      check-type-assertions: false
+      check-blank: false
+      disable-default-exclusions: false
+      verbose: false
+
+formatters:
+  settings:
+    gofmt:
+      simplify: true
