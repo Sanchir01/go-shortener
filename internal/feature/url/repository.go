@@ -23,14 +23,15 @@ func NewRepository(primaryDB *pgxpool.Pool, l *slog.Logger) *Repository {
 	}
 }
 
-func (r *Repository) CreateUrl(ctx context.Context, userId uuid.UUID, url, alise string, tx pgx.Tx) error {
+func (r *Repository) CreateUrl(ctx context.Context, userId uuid.UUID, url, alias string, tx pgx.Tx) error {
 	const op = "Url.Repository.CreateUrl"
 	log := r.l.With(slog.String("op", op))
 
+	log.Info("creating url repo", "url", url, "alias", alias)
 	query, args, err := sq.
 		Insert("url").
 		Columns("user_id", "url", "alias").
-		Values(userId, url, alise).
+		Values(userId, url, alias).
 		PlaceholderFormat(sq.Dollar).
 		ToSql()
 
@@ -38,9 +39,6 @@ func (r *Repository) CreateUrl(ctx context.Context, userId uuid.UUID, url, alise
 		log.Error("error", err.Error())
 		return err
 	}
-
-	id := uuid.New()
-	args = append(args, id.String())
 
 	if _, err := tx.Exec(ctx, query, args...); err != nil {
 		log.Error("error", err.Error())

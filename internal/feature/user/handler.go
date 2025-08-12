@@ -46,7 +46,7 @@ func NewHandler(s HandlerUser, lg *slog.Logger) *Handler {
 // @Failure 500 {object}  api.Response
 // @Router /register [post]
 func (h *Handler) RegisterHandler(w http.ResponseWriter, r *http.Request) {
-	const op = "handlers.register"
+	const op = "User.Handler.Register"
 	log := h.log.With(
 		slog.String("op", op),
 		slog.String("request_id", middleware.GetReqID(r.Context())),
@@ -79,7 +79,7 @@ func (h *Handler) RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	log.Info("login success")
 
-	if err = AddCookieTokens(*id, w, "localhost"); err != nil {
+	if err = AddCookieTokens(*id, w, "user", "localhost"); err != nil {
 		log.Error("register cookie errors", err.Error())
 		render.Status(r, http.StatusInternalServerError)
 		render.JSON(w, r, api.Error("failed to register cookie"))
@@ -88,6 +88,8 @@ func (h *Handler) RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	render.Status(r, http.StatusCreated)
 	render.JSON(w, r, AuthResponse{
 		Response: api.OK(),
+		Email:    req.Email,
+		Username: req.Username,
 	})
 }
 
@@ -133,6 +135,12 @@ func (h *Handler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 		log.Error("failed to login", logger.Err(err))
 		render.Status(r, http.StatusInternalServerError)
 		render.JSON(w, r, api.Error("internal server error"))
+		return
+	}
+	if err = AddCookieTokens(user.ID, w, user.Role, "localhost"); err != nil {
+		log.Error("register cookie errors", logger.Err(err))
+		render.Status(r, http.StatusInternalServerError)
+		render.JSON(w, r, api.Error("failed to register cookie"))
 		return
 	}
 	render.JSON(w, r, LoginResponse{

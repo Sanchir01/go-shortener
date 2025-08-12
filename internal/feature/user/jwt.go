@@ -13,13 +13,15 @@ import (
 )
 
 type Claims struct {
-	ID uuid.UUID `json:"id"`
+	ID   uuid.UUID `json:"id"`
+	Role string    `json:"role"`
 	jwt.RegisteredClaims
 }
 
-func GenerateJwtToken(id uuid.UUID, expire time.Time) (string, error) {
+func GenerateJwtToken(id uuid.UUID, role string, expire time.Time) (string, error) {
 	claim := &Claims{
-		ID: id,
+		ID:   id,
+		Role: role,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(expire),
 		},
@@ -56,14 +58,14 @@ func ParseToken(tokenString string) (*Claims, error) {
 	return nil, errors.New("invalid token")
 
 }
-func AddCookieTokens(id uuid.UUID, w http.ResponseWriter, domain string) error {
+func AddCookieTokens(id uuid.UUID, w http.ResponseWriter, role string, domain string) error {
 	expirationTimeAccess := time.Now().Add(4 * time.Hour)
 	expirationTimeRefresh := time.Now().Add(14 * 24 * time.Hour)
-	refreshToken, err := GenerateJwtToken(id, expirationTimeRefresh)
+	refreshToken, err := GenerateJwtToken(id, role, expirationTimeRefresh)
 	if err != nil {
 		return err
 	}
-	accessToken, err := GenerateJwtToken(id, expirationTimeAccess)
+	accessToken, err := GenerateJwtToken(id, role, expirationTimeAccess)
 	if err != nil {
 		return err
 	}
@@ -84,7 +86,7 @@ func NewAccessToken(tokenString string, threshold time.Duration, w http.Response
 	}
 
 	newExpire := time.Now().Add(4 * time.Hour)
-	newToken, err := GenerateJwtToken(claims.ID, newExpire)
+	newToken, err := GenerateJwtToken(claims.ID, claims.Role, newExpire)
 	if err != nil {
 		return "", err
 	}

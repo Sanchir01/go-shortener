@@ -14,6 +14,7 @@ type DatabaseUser struct {
 	Password  []byte    `db:"password"`
 	CreatedAt time.Time `db:"created_at"`
 	UpdatedAt time.Time `db:"updated_at"`
+	Role      string    `db:"role"`
 	Version   int64     `db:"version"`
 }
 type AuthRequest struct {
@@ -35,6 +36,8 @@ type GoogleTokenResponse struct {
 }
 type AuthResponse struct {
 	api.Response
+	Email    string
+	Username string
 }
 
 type LoginRequest struct {

@@ -30,6 +30,8 @@ func StartHTTTPHandlers(handlers *app.Handlers, domain string, l *slog.Logger) h
 			})
 		})
 		r.Route("/url", func(r chi.Router) {
+			r.Use(customiddleware.AuthMiddleware(domain))
+			r.Post("/save", handlers.UrlHandler.CreateUrlHandler)
 			r.Get("/", handlers.UrlHandler.GetAllUrlHandler)
 
 		})

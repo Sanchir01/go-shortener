@@ -68,8 +68,8 @@ func (s *Service) CreateUrl(ctx context.Context, userId uuid.UUID, url string) e
 			}
 		}
 	}()
-
-	if err := s.repo.CreateUrl(ctx, userId, url, "", tx); err != nil {
+	alias := NewRandomString(10)
+	if err := s.repo.CreateUrl(ctx, userId, url, alias, tx); err != nil {
 		log.Error("create url error", err.Error())
 		return err
 	}

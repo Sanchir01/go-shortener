@@ -6,6 +6,7 @@ import (
 	"log/slog"
 
 	"github.com/Sanchir01/currency-wallet/pkg/utils"
+	"github.com/Sanchir01/go-shortener/pkg/logger"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -42,7 +43,7 @@ func (s *Service) Register(ctx context.Context, email, username, password string
 	defer conn.Release()
 	tx, err := conn.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
-		log.Error("tx error", err.Error())
+		log.Error("tx error", logger.Err(err))
 		return nil, err
 	}
 
@@ -59,19 +60,19 @@ func (s *Service) Register(ctx context.Context, email, username, password string
 	}()
 	hashedPassword, err := GeneratePasswordHash(password)
 	if err != nil {
-		log.Error("error generating password hash", err.Error())
+		log.Error("error generating password hash", logger.Err(err))
 		return nil, err
 	}
 	user, err := s.repository.CreateUser(ctx, email, username, hashedPassword, tx)
 	if err != nil {
-		log.Error("error creating user", err.Error())
+		log.Error("error creating user", logger.Err(err))
 		return nil, err
 	}
 
 	if err := tx.Commit(ctx); err != nil {
-		log.Error("tx commit error", err.Error())
+		log.Error("tx commit error", logger.Err(err))
 	}
-	log.Info("user created success", user.String())
+	log.Info("user created success", logger.Err(err))
 	return user, nil
 }
 
@@ -80,7 +81,7 @@ func (s *Service) Login(ctx context.Context, email, password string) (*DatabaseU
 	log := s.log.With(slog.String("op", op))
 	user, err := s.repository.GetUserByEmail(ctx, email)
 	if err != nil {
-		log.Error("error getting user by email", err.Error())
+		log.Error("error getting user by email", logger.Err(err))
 		return nil, err
 	}
 	ok := VerifyPassword(user.Password, password)
