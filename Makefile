@@ -22,6 +22,9 @@ migrations-click-up:
 lint:
 	golangci-lint run
 
+tests:
+	go test ./test/...
+
 migrations-up:
 	goose -dir $(FOLDER_PG) postgres $(DB_CONN_DEV)   up
 

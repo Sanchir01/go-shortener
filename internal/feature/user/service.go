@@ -52,7 +52,7 @@ func (s *Service) Register(ctx context.Context, email, username, password string
 			rollbackErr := tx.Rollback(ctx)
 			if rollbackErr != nil {
 				err = errors.Join(err, rollbackErr)
-				log.Error("rollback error", rollbackErr.Error())
+				log.Error("rollback error", logger.Err(rollbackErr))
 				return
 			}
 		}
@@ -72,7 +72,7 @@ func (s *Service) Register(ctx context.Context, email, username, password string
 	if err := tx.Commit(ctx); err != nil {
 		log.Error("tx commit error", logger.Err(err))
 	}
-	log.Info("user created success", logger.Err(err))
+	log.Info("user created success")
 	return user, nil
 }
 

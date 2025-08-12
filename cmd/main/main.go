@@ -32,30 +32,30 @@ import (
 func main() {
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGTERM, syscall.SIGINT, os.Interrupt)
 	defer cancel()
-	app, err := app.NewApp(ctx)
+	application, err := app.NewApp(ctx)
 	if err != nil {
-		app.Log.Error("panic error", err.Error())
+		slog.Error("panic error", slog.Any("err", err))
 		panic(err)
 	}
 
 	go func() {
-		if err := app.HttpServer.Run(httphandlers.StartHTTTPHandlers(app.Handlers, app.Cfg.Domain, app.Log)); err != nil {
-			app.Log.Error("Error while running http server", slog.String("error", err.Error()))
+		if err := application.HttpServer.Run(httphandlers.StartHTTTPHandlers(application.Handlers, application.Cfg.Domain, application.Log)); err != nil {
+			application.Log.Error("Error while running http server", slog.String("error", err.Error()))
 			cancel()
 		}
 	}()
 	go func() {
-		if err := app.PrometheusServer.Run(httphandlers.StartPrometheusHandlers()); err != nil {
-			app.Log.Error("Error while running prometheus server", slog.String("error", err.Error()))
+		if err := application.PrometheusServer.Run(httphandlers.StartPrometheusHandlers()); err != nil {
+			application.Log.Error("Error while running prometheus server", slog.String("error", err.Error()))
 			cancel()
 		}
 	}()
 	<-ctx.Done()
 
-	if err := app.HttpServer.Gracefull(ctx); err != nil {
-		app.Log.Error("Close database", slog.String("error", err.Error()))
+	if err := application.HttpServer.Gracefull(ctx); err != nil {
+		application.Log.Error("Close database", slog.String("error", err.Error()))
 	}
-	if err := app.DB.Close(); err != nil {
-		app.Log.Error("Close database", slog.String("error", err.Error()))
+	if err := application.DB.Close(); err != nil {
+		application.Log.Error("Close database", slog.String("error", err.Error()))
 	}
 }

@@ -27,7 +27,7 @@ func NewApp(ctx context.Context) (*App, error) {
 	l, _ := logger.SetupLogger(ctx, cfg.Env)
 	database, err := db.NewDataBases(cfg, ctx, l)
 	if err != nil {
-		l.Error("db error", err.Error())
+		l.Error("db error", slog.String("error", err.Error()))
 		return nil, err
 	}
 	repo := NewRepositories(database, l)

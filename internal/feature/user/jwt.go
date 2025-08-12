@@ -101,7 +101,7 @@ func GenerateCookie(name string, expire time.Time, httpOnly bool, value string, 
 		Expires:     expire,
 		Partitioned: true,
 		Path:        "/",
-		Secure:      true,
+		Secure:      os.Getenv("ENV") == "production",
 		HttpOnly:    httpOnly,
 		SameSite:    http.SameSiteLaxMode,
 	}

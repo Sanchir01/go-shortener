@@ -5,7 +5,7 @@ import (
 	"net/url"
 	"testing"
 
-	featureUrl "github.com/Sanchir01/go-shortener/internal/feature/url"
+	urls "github.com/Sanchir01/go-shortener/internal/feature/url"
 	"github.com/Sanchir01/go-shortener/internal/feature/user"
 	"github.com/brianvoe/gofakeit/v7"
 	"github.com/gavv/httpexpect/v2"
@@ -52,10 +52,11 @@ func Test_Auth_Register_Login(t *testing.T) {
 		ContainsKey("status").
 		ContainsKey("email").
 		ContainsKey("username")
-}
 
-func Test_Create_Url(t *testing.T) {
-	e := CreateHttpExpect(t)
-
-	e.POST("/url/save").WithJSON(featureUrl.GetAllUrlResponse{})
+	e.GET("/url").Expect().Status(http.StatusOK)
+	e.POST("/url/save").WithJSON(urls.CreateUrlRequest{
+		Url: gofakeit.URL(),
+	}).
+		Expect().
+		Status(http.StatusCreated).JSON().Object().ContainsKey("status")
 }

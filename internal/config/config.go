@@ -64,7 +64,7 @@ func InitConfig() *Config {
 	}
 	fmt.Println("env name", envFile)
 	if err := godotenv.Load(envFile); err != nil {
-		slog.Error("ошибка при инициализации переменных окружения", err.Error())
+		slog.Error("ошибка при инициализации переменных окружения", slog.Any("err", err))
 	}
 	configPath := os.Getenv("CONFIG_PATH")
 

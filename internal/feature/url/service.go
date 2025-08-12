@@ -6,6 +6,7 @@ import (
 	"log/slog"
 
 	"github.com/Sanchir01/go-shortener/internal/domain/models"
+	"github.com/Sanchir01/go-shortener/pkg/logger"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -36,7 +37,7 @@ func (s *Service) GetAllUrl(ctx context.Context) ([]models.Url, error) {
 
 	urls, err := s.repo.GetAllUrl(ctx)
 	if err != nil {
-		log.Error("msg string", err.Error())
+		log.Error("get all urls error", logger.Err(err))
 		return nil, err
 	}
 	log.Info("Getting all URLs completed service")
@@ -54,7 +55,7 @@ func (s *Service) CreateUrl(ctx context.Context, userId uuid.UUID, url string) e
 	defer conn.Release()
 	tx, err := conn.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
-		log.Error("tx error", err.Error())
+		log.Error("tx error", logger.Err(err))
 		return err
 	}
 
@@ -63,19 +64,19 @@ func (s *Service) CreateUrl(ctx context.Context, userId uuid.UUID, url string) e
 			rollbackErr := tx.Rollback(ctx)
 			if rollbackErr != nil {
 				err = errors.Join(err, rollbackErr)
-				log.Error("rollback error", rollbackErr.Error())
+				log.Error("rollback error", logger.Err(rollbackErr))
 				return
 			}
 		}
 	}()
 	alias := NewRandomString(10)
 	if err := s.repo.CreateUrl(ctx, userId, url, alias, tx); err != nil {
-		log.Error("create url error", err.Error())
+		log.Error("create url error", logger.Err(err))
 		return err
 	}
 
 	if err := tx.Commit(ctx); err != nil {
-		log.Error("commit error", "msg", err.Error())
+		log.Error("commit error", logger.Err(err))
 		return err
 	}
 

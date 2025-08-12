@@ -18,14 +18,14 @@ type Database struct {
 func NewDataBases(cfg *config.Config, ctx context.Context, l *slog.Logger) (*Database, error) {
 	pgxdb, err := PGXNew(cfg, ctx)
 	if err != nil {
-		l.Error("pg error", err.Error())
+		l.Error("pg error", slog.String("error", err.Error()))
 		return nil, err
 	}
 	redisdb, err := RedisConnect(context.Background(), cfg.RedisDB.Host, cfg.RedisDB.Port,
 		os.Getenv("REDIS_PASSWORD"), cfg.Env,
 		cfg.RedisDB.DBNumber, cfg.RedisDB.Retries)
 	if err != nil {
-		l.Error("redis error", err.Error())
+		l.Error("redis error", slog.String("error", err.Error()))
 		return nil, err
 	}
 	return &Database{PrimaryDB: pgxdb, RedisDB: redisdb}, nil

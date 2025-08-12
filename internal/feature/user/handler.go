@@ -80,7 +80,7 @@ func (h *Handler) RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	log.Info("login success")
 
 	if err = AddCookieTokens(*id, w, "user", "localhost"); err != nil {
-		log.Error("register cookie errors", err.Error())
+		log.Error("register cookie errors", logger.Err(err))
 		render.Status(r, http.StatusInternalServerError)
 		render.JSON(w, r, api.Error("failed to register cookie"))
 		return

@@ -6,12 +6,12 @@ import (
 )
 
 type GetAllUrlResponse struct {
-	Response api.Response
-	Urls     []models.Url `json:"urls"`
+	api.Response
+	Urls []models.Url `json:"urls"`
 }
 type CreateUrlResponse struct {
-	Response api.Response
-	Url      string `json:"url"`
+	api.Response
+	Url string `json:"url"`
 }
 type CreateUrlRequest struct {
 	Url string `json:"url" validate:"required"`

@@ -103,7 +103,7 @@ func (h *Handler) CreateUrlHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	render.Status(r, http.StatusOK)
+	render.Status(r, http.StatusCreated)
 	render.JSON(w, r, CreateUrlResponse{
 		Response: api.OK(),
 	})

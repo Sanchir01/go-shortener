@@ -64,7 +64,7 @@ func AuthMiddleware(domain string) func(http.Handler) http.Handler {
 				}
 				token, err := user.ParseToken(accessToken)
 				if err != nil {
-					slog.Error("failed parse token middleware", err.Error())
+					slog.Error("failed parse token middleware", slog.Any("err", err))
 					next.ServeHTTP(w, r)
 					return
 				}
@@ -76,7 +76,7 @@ func AuthMiddleware(domain string) func(http.Handler) http.Handler {
 
 			validAccessToken, err := user.ParseToken(access.Value)
 			if err != nil {
-				slog.Error("failed parse token middleware", err.Error())
+				slog.Error("failed parse token middleware", slog.Any("err", err))
 				next.ServeHTTP(w, r)
 				return
 			}
