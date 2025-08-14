@@ -1,6 +1,6 @@
 -- +goose Up
 -- +goose StatementBegin
-ALTER TABLE users ADD COLUMN IF NOT EXISTS password BYTEA NOT NULL
+ALTER TABLE users ADD COLUMN IF NOT EXISTS password BYTEA 
 -- +goose StatementEnd
 
 -- +goose Down

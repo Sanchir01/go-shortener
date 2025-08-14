@@ -54,6 +54,7 @@ func Test_Auth_Register_Login(t *testing.T) {
 		ContainsKey("username")
 
 	e.GET("/url").Expect().Status(http.StatusOK)
+	e.GET("/url/all").Expect().Status(http.StatusOK)
 	e.POST("/url/save").WithJSON(urls.CreateUrlRequest{
 		Url: gofakeit.URL(),
 	}).

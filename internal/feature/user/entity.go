@@ -26,6 +26,12 @@ type AuthRequest struct {
 type GoogleRegisterRequest struct {
 	Code string `json:"code" validate:"required"`
 }
+type RegisterParams struct {
+	Email    *string
+	TGID     *int64
+	Password *string
+	Title    string
+}
 type GoogleTokenResponse struct {
 	AccessToken  string `json:"access_token"`
 	TokenType    string `json:"token_type"`

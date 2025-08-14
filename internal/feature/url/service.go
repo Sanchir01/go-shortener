@@ -43,19 +43,30 @@ func (s *Service) GetAllUrl(ctx context.Context) ([]models.Url, error) {
 	log.Info("Getting all URLs completed service")
 	return urls, nil
 }
-
+func (s *Service) GetUrlByUser(ctx context.Context, userId uuid.UUID) ([]models.Url, error) {
+	const op = "Url.Service.GetAllUrl"
+	log := s.l.With(slog.String("op", op))
+	urls, err := s.repo.GetUrlByUserId(ctx, userId)
+	if err != nil {
+		log.Error("get all users urls error", logger.Err(err))
+		return nil, err
+	}
+	log.Info("get users complete")
+	return urls, nil
+}
 func (s *Service) CreateUrl(ctx context.Context, userId uuid.UUID, url string) error {
 	const op = "Url.Service.CreateUrl"
 	log := s.l.With(slog.String("op", op))
 
 	conn, err := s.primaryDB.Acquire(ctx)
 	if err != nil {
+		log.Error("errir init acquire", logger.Err(err))
 		return err
 	}
 	defer conn.Release()
 	tx, err := conn.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
-		log.Error("tx error", logger.Err(err))
+		log.Error("error init tx", logger.Err(err))
 		return err
 	}
 

@@ -42,7 +42,7 @@ func NewHandler(service *Service, l *slog.Logger) *Handler {
 // @Success 200 {object}  GetAllUrlResponse
 // @Failure 400,404 {object}  api.Response
 // @Failure 500 {object}  api.Response
-// @Router /url [get]
+// @Router /url/all [get]
 func (h *Handler) GetAllUrlHandler(w http.ResponseWriter, r *http.Request) {
 	const op = "Url.Handler.GetAllUrl"
 	log := h.l.With(slog.String("op", op))
@@ -106,5 +106,41 @@ func (h *Handler) CreateUrlHandler(w http.ResponseWriter, r *http.Request) {
 	render.Status(r, http.StatusCreated)
 	render.JSON(w, r, CreateUrlResponse{
 		Response: api.OK(),
+	})
+}
+
+// @Summary  GetAllUrlByUserId
+// @Tags url
+// @Description Get all urls by id
+// @Accept json
+// @Produce json
+// @Success 200 {object}  GetAllUrlResponse
+// @Failure 400,404 {object}  api.Response
+// @Failure 500 {object}  api.Response
+// @Router /url [get]
+func (h *Handler) GetAllUrlByUserId(w http.ResponseWriter, r *http.Request) {
+	const op = "Url.Handler.CreateUrl"
+	log := h.l.With(
+		slog.String("op", op),
+		slog.String("request_id", middleware.GetReqID(r.Context())),
+	)
+	claims, ok := r.Context().Value(contextkey.UserIDCtxKey).(*user.Claims)
+	if !ok {
+		log.Error("failed to parse product uuid")
+		render.Status(r, http.StatusUnauthorized)
+		render.JSON(w, r, api.Error("Unauthorized"))
+		return
+	}
+	url, err := h.service.GetUrlByUser(r.Context(), claims.ID)
+	if err != nil {
+		log.Error("failed to parse product uuid")
+		render.Status(r, http.StatusInternalServerError)
+		render.JSON(w, r, api.Error("failed send coins"))
+		return
+	}
+	render.Status(r, http.StatusOK)
+	render.JSON(w, r, GetAllUrlResponse{
+		Response: api.OK(),
+		Urls:     url,
 	})
 }

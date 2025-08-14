@@ -22,10 +22,19 @@ definitions:
       userID:
         type: string
     type: object
+  url.CreateUrlRequest:
+    properties:
+      url:
+        type: string
+    required:
+    - url
+    type: object
   url.GetAllUrlResponse:
     properties:
-      response:
-        $ref: '#/definitions/api.Response'
+      error:
+        type: string
+      status:
+        type: string
       urls:
         items:
           $ref: '#/definitions/models.Url'
@@ -33,10 +42,21 @@ definitions:
     type: object
   user.AuthResponse:
     properties:
+      email:
+        type: string
       error:
         type: string
       status:
         type: string
+      username:
+        type: string
+    type: object
+  user.GoogleRegisterRequest:
+    properties:
+      code:
+        type: string
+    required:
+    - code
     type: object
   user.LoginRequest:
     properties:
@@ -74,6 +94,13 @@ paths:
       consumes:
       - application/json
       description: google register user
+      parameters:
+      - description: auth body
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/user.GoogleRegisterRequest'
       produces:
       - application/json
       responses:
@@ -168,6 +195,33 @@ paths:
     get:
       consumes:
       - application/json
+      description: Get all urls by id
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/url.GetAllUrlResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.Response'
+      summary: GetAllUrlByUserId
+      tags:
+      - url
+  /url/all:
+    get:
+      consumes:
+      - application/json
       description: Get all urls admin
       produces:
       - application/json
@@ -189,6 +243,40 @@ paths:
           schema:
             $ref: '#/definitions/api.Response'
       summary: GetAllUrlHandler
+      tags:
+      - url
+  /url/save:
+    post:
+      consumes:
+      - application/json
+      description: Create url
+      parameters:
+      - description: login body
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/url.CreateUrlRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/url.GetAllUrlResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/api.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.Response'
+      summary: CreateUrlHandler
       tags:
       - url
 securityDefinitions:

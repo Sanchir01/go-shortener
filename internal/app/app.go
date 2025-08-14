@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log/slog"
 
+	tgbot "github.com/Sanchir01/go-shortener/internal/bot"
 	"github.com/Sanchir01/go-shortener/internal/config"
 	httpserver "github.com/Sanchir01/go-shortener/internal/server/http"
 	"github.com/Sanchir01/go-shortener/pkg/db"
@@ -16,6 +17,7 @@ type App struct {
 	Cfg              *config.Config
 	Handlers         *Handlers
 	Services         *Services
+	Bot              *tgbot.TGBot
 	DB               *db.Database
 	HttpServer       *httpserver.Server
 	PrometheusServer *httpserver.Server
@@ -32,6 +34,13 @@ func NewApp(ctx context.Context) (*App, error) {
 	}
 	repo := NewRepositories(database, l)
 	services := NewServices(repo, database, l)
+
+	botInstance, err := tgbot.New(ctx, services.UrlService, services.UserService, l)
+	if err != nil {
+		l.Error("bot connect error:", slog.String("error", err.Error()))
+		return nil, err
+	}
+
 	handlers := NewHandlers(services, l)
 	httpServer := httpserver.NewHTTPServer(cfg.HttpServer.Host, cfg.HttpServer.Port, cfg.HttpServer.Timeout, cfg.HttpServer.IdleTimeout)
 	prometheusServer := httpserver.NewHTTPServer(cfg.Prometheus.Host, cfg.Prometheus.Port, cfg.Prometheus.Timeout, cfg.Prometheus.IdleTimeout)
@@ -41,6 +50,7 @@ func NewApp(ctx context.Context) (*App, error) {
 		Cfg:              cfg,
 		HttpServer:       httpServer,
 		Services:         services,
+		Bot:              botInstance,
 		Handlers:         handlers,
 		DB:               database,
 		PrometheusServer: prometheusServer,

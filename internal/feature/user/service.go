@@ -22,6 +22,7 @@ type ServiceUser interface {
 	CreateUser(ctx context.Context, email, username string, password []byte, tx pgx.Tx) (*uuid.UUID, error)
 	GetUserByID(ctx context.Context, id uuid.UUID) (*DatabaseUser, error)
 	GetUserByEmail(ctx context.Context, email string) (*DatabaseUser, error)
+	CreateUserByTG(ctx context.Context, tg_id int64, username string, tx pgx.Tx) (*uuid.UUID, error)
 }
 
 func NewService(r ServiceUser, db *pgxpool.Pool, l *slog.Logger) *Service {
@@ -32,7 +33,7 @@ func NewService(r ServiceUser, db *pgxpool.Pool, l *slog.Logger) *Service {
 	}
 }
 
-func (s *Service) Register(ctx context.Context, email, username, password string) (*uuid.UUID, error) {
+func (s *Service) Register(ctx context.Context, p RegisterParams) (*uuid.UUID, error) {
 	const op = "User.Service.Register"
 	log := s.log.With(slog.String("op", op))
 	conn, err := s.primaryDB.Acquire(ctx)
@@ -58,15 +59,26 @@ func (s *Service) Register(ctx context.Context, email, username, password string
 		}
 
 	}()
-	hashedPassword, err := GeneratePasswordHash(password)
-	if err != nil {
-		log.Error("error generating password hash", logger.Err(err))
-		return nil, err
-	}
-	user, err := s.repository.CreateUser(ctx, email, username, hashedPassword, tx)
-	if err != nil {
-		log.Error("error creating user", logger.Err(err))
-		return nil, err
+	var user *uuid.UUID
+	switch {
+	case p.Email != nil:
+		hashedPassword, err := GeneratePasswordHash(*p.Password)
+		if err != nil {
+			log.Error("error generating password hash", logger.Err(err))
+			return nil, err
+		}
+		user, err = s.repository.CreateUser(ctx, *p.Email, p.Title, hashedPassword, tx)
+		if err != nil {
+			log.Error("error creating user", logger.Err(err))
+			return nil, err
+		}
+	case p.TGID != nil:
+		id, err := s.repository.CreateUserByTG(ctx, *p.TGID, p.Title, tx)
+		if err != nil {
+			log.Error("error creating user", logger.Err(err))
+			return nil, err
+		}
+		log.Info("user id", id)
 	}
 
 	if err := tx.Commit(ctx); err != nil {

@@ -74,7 +74,33 @@ func (r *Repository) CreateUser(ctx context.Context, email, username string, pas
 	}
 	return &id, nil
 }
+func (r *Repository) CreateUserByTG(ctx context.Context, tg_id int64, username string, tx pgx.Tx) (*uuid.UUID, error) {
 
+	r.l.Info("tg id: ", tg_id, "username", username)
+	query, arg, err := sq.
+		Insert("users").
+		Columns("tg_id", "title").
+		Values(tg_id, "user").
+		Suffix("RETURNING id").
+		PlaceholderFormat(sq.Dollar).
+		ToSql()
+	if err != nil {
+		return nil, utils.ErrorQueryString
+	}
+	var id uuid.UUID
+
+	if err := tx.QueryRow(ctx, query, arg...).Scan(&id); err != nil {
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) {
+			if pgErr.Code == "23505" {
+				return nil, fmt.Errorf("пользователь с таким email или username уже существует")
+			}
+		}
+
+		return nil, err
+	}
+	return &id, nil
+}
 func (r *Repository) GetUserByID(ctx context.Context, id uuid.UUID) (*DatabaseUser, error) {
 	conn, err := r.primaryDB.Acquire(ctx)
 	if err != nil {

@@ -24,7 +24,7 @@ type Handler struct {
 
 //go:generate go run github.com/vektra/mockery/v2@v2.52.2 --name=HandlerUser
 type HandlerUser interface {
-	Register(ctx context.Context, email, username, password string) (*uuid.UUID, error)
+	Register(ctx context.Context, p RegisterParams) (*uuid.UUID, error)
 	Login(ctx context.Context, email, password string) (*DatabaseUser, error)
 }
 
@@ -64,7 +64,11 @@ func (h *Handler) RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		render.JSON(w, r, api.Error("invalid request"))
 		return
 	}
-	id, err := h.Service.Register(r.Context(), req.Email, req.Username, req.Password)
+	id, err := h.Service.Register(r.Context(), RegisterParams{
+		Email:    &req.Email,
+		Title:    req.Username,
+		Password: &req.Password,
+	})
 	if errors.Is(err, utils.ErrorUserAlreadyExists) {
 		log.Error("user already exists", logger.Err(err))
 		render.Status(r, http.StatusBadRequest)
@@ -212,13 +216,17 @@ func (h *Handler) GoogleCallback(w http.ResponseWriter, r *http.Request) {
 	}
 
 	log.Info("successfully exchanged code for token")
-	if _, err := h.Service.Register(r.Context(), data.Name, data.Email, data.IDToken); err != nil {
+	if _, err := h.Service.Register(r.Context(), RegisterParams{
+		Email: &data.Email,
+		Title: data.Name,
+	}); err != nil {
 		log.Error("failed to register user", logger.Err(err))
 		render.Status(r, http.StatusInternalServerError)
 		render.JSON(w, r, api.Error("failed to register user"))
 		return
 	}
 
+	render.Status(r, http.StatusCreated)
 	render.JSON(w, r, map[string]interface{}{
 		"status":  "success",
 		"message": "Google authentication successful",

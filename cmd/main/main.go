@@ -50,6 +50,9 @@ func main() {
 			cancel()
 		}
 	}()
+	go func() {
+		application.Bot.Bot.Start(ctx)
+	}()
 	<-ctx.Done()
 
 	if err := application.HttpServer.Gracefull(ctx); err != nil {

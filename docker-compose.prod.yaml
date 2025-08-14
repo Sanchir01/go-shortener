@@ -17,12 +17,14 @@ services:
       - redis_data:/data
   prometheus:
     image: prom/prometheus:latest
+    container_name: prometheus
     volumes:
       - ./config/prometheus.yml:/etc/prometheus/prometheus.yml
     ports:
-      - "9091:9090"
+      - "9090:9090"
   grafana:
     image: grafana/grafana:latest
+    container_name: grafana
     ports:
       - "13001:3000"
     volumes:
@@ -31,27 +33,10 @@ services:
     depends_on:
       - prometheus
       - loki
+      - pyroscope
     environment:
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=admin
-  promtail:
-    image: grafana/promtail:latest
-    ports:
-      - "9080:9080"
-    volumes:
-      - /var/lib/docker/containers:/var/lib/docker/containers:ro
-      - /var/run/docker.sock:/var/run/docker.sock
-      - ./config/promtail.yaml:/etc/promtail/config.yml
-    command: -config.file=/etc/promtail/config.yml
-    privileged: true
-  loki:
-    image: grafana/loki:latest
-    container_name: loki
-    ports:
-      - "3101:3100"
-    volumes:
-      - ./config/loki.yaml:/etc/loki/local-config.yaml
 volumes:
   db:
-  grafana_data:
   redis_data:
